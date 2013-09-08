@@ -602,7 +602,9 @@
  * Centrifuge javascript client
  *
  */
-(function () {
+(function (EventEmitter) {
+    'use strict';
+
     /**
      * Mixes in the given objects into the target object by copying the properties.
      * @param deep if the copy must be deep
@@ -1332,4 +1334,4 @@
         window.CentrifugeSubscription = Subscription;
     }
 
-})();
+}.call(this, this.EventEmitter));
