@@ -728,7 +728,7 @@
         }
     }
 
-    Centrifuge.inherit(EventEmitter);
+    Centrifuge.inherit(this.EventEmitter);
 
     var centrifuge_proto = Centrifuge.prototype;
 
@@ -1200,7 +1200,7 @@
         this.channel = matches[1];
     }
 
-    Subscription.inherit(EventEmitter);
+    Subscription.inherit(this.EventEmitter);
 
     var sub_proto = Subscription.prototype;
 
