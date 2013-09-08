@@ -1310,23 +1310,26 @@
         this._centrifuge.send(message);
     };
 
-    window.Centrifuge = Centrifuge;
-    window.CentrifugeSubscription = Subscription;
-
+    //create a namespace to export
+    var ns = {
+        centrifuge: Centrifuge,
+        subscription: Subscription
+    };
 
     if (typeof define === 'function' && define.amd) {
-      console.log("AMD");
+        console.log("AMD");
         define(function () {
             return ns;
         });
     }
     else if (typeof module === 'object' && module.exports) {
-      console.log("exports");
+        console.log("exports");
         module.exports = ns;
     }
     else {
-      console.log("normal");
-        this.ns = ns;
+        console.log("normal");
+        window.Centrifuge = Centrifuge;
+        window.CentrifugeSubscription = Subscription;
     }
 
-}).call(this);
+})();
