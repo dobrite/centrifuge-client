@@ -1310,7 +1310,7 @@
         this._centrifuge.send(message);
     };
 
-    window.Centrifuge = Centrifuge;
-    window.CentrifugeSubscription = Subscription;
+    Centrifuge.Subscription = Subscription;
+    return Centrifuge;
 
 })();
