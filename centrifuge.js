@@ -603,8 +603,9 @@
         this._messageId = 0;
         this._clientId = null;
         this._subscriptions = {};
-        this._fullRegex = /^\/([^_]+[A-z0-9]{2,})\/(.+)$/;
-        this._channelOnlyRegex = /^\/(.+)$/;
+        this._sep = ':';
+        this._fullRegex = /^([^_]+[A-z0-9_@\-]{2,}):([A-z0-9_@\-\.]+)$/;
+        this._channelOnlyRegex = /^([A-z0-9_@\-\.]+)$/;
         this._config = {
             retry: 3000,
             debug: false,
@@ -690,9 +691,16 @@
 
     centrifuge_proto._makePath = function (namespace, channel) {
         if (namespace === '' || namespace === null || namespace == undefined) {
-            return '/' + channel;
+            if (!this._channelOnlyRegex.test(channel)) {
+                throw "Invalid channel name " + channel;
+            }
+            return channel;
         }
-        return '/' + namespace + '/' + channel;
+        var path = namespace + this._sep + channel;
+        if (!this._fullRegex.test(path)) {
+            throw "Invalid path " + path;
+        }
+        return path;
     };
 
     centrifuge_proto._setStatus = function (newStatus) {
@@ -874,6 +882,7 @@
             return;
         }
         if (message.error === null) {
+            subscription.subscribed = true;
             subscription.trigger('subscribe:success', [message]);
         } else {
             subscription.trigger('subscribe:error', [message]);
@@ -1075,6 +1084,23 @@
         }
     };
 
+    centrifuge_proto.unsubscribe = function (path) {
+        if (arguments.length < 1) {
+            throw 'Illegal arguments number: required 1, got ' + arguments.length;
+        }
+        if (!isString(path)) {
+            throw 'Illegal argument type: channel must be a string';
+        }
+        if (this.isDisconnected()) {
+            return;
+        }
+
+        var current_subscription = this._getSubscription(path);
+        if (current_subscription !== null) {
+            current_subscription.unsubscribe();
+        }
+    };
+
     centrifuge_proto.publish = function (path, data, callback) {
         var subscription = this.getSubscription(path);
         if (subscription === null) {
@@ -1116,6 +1142,7 @@
         var matches = this.parsePath();
         this.namespace = matches[0];
         this.channel = matches[1];
+        this.subscribed = false;
     }
 
     extend(Subscription, EventEmitter);
@@ -1153,7 +1180,8 @@
     };
 
     sub_proto.unsubscribe = function () {
-        this._centrifuge._removeSubscription(this.path);
+        this.subscribed = false;
+        this._centrifuge._removeSubscription(this._path);
         var centrifugeMessage = {
             "method": "unsubscribe",
             "params": {
