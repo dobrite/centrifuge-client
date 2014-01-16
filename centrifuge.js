@@ -1,5 +1,8 @@
-//noinspection ThisExpressionReferencesGlobalObjectJS
-(function () {
+/**
+ * Centrifuge javascript client
+ * v0.4.1
+ */
+;(function () {
     'use strict';
 
     /**
